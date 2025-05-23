@@ -197,6 +197,7 @@ fn visit_stmt(stmt: &mut Stmt, s: &mut S) -> Vec<Stmt> {
 }
 
 fn visit_expr(expr: &mut Expr, before: &mut Vec<Stmt>, s: &mut S) {
+    println!("visit_expr: {expr:?}, {before:?}");
     let replace: Option<Expr> = match expr {
         Expr::Value { value: _, span: _ } => None,
         Expr::Name(name) => {
@@ -205,10 +206,13 @@ fn visit_expr(expr: &mut Expr, before: &mut Vec<Stmt>, s: &mut S) {
         }
         Expr::Dot {
             lhs,
-            rhs: _,
+            rhs,
             rhs_span: _,
         } => {
             visit_expr(lhs, before, s);
+            if let Expr::Name(name) = *lhs.clone() {
+                s.references.names_fields.insert((name.basename().clone(), rhs.clone()));
+            }
             None
         }
         Expr::Arg(name) => {

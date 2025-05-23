@@ -68,7 +68,7 @@ fn resolve_references(
     references: &References,
 ) {
     for name in &references.names {
-        if let Some(global_vars) = &mut scope.global_vars {
+\        if let Some(global_vars) = &mut scope.global_vars {
             if let Some(var) = global_vars.get_mut(name) {
                 var.is_used = true;
                 continue;
@@ -85,6 +85,14 @@ fn resolve_references(
         }
         if let Some(list) = scope.lists.get_mut(name) {
             list.is_used = true;
+        }
+    }
+    for (name, field) in &references.names_fields {
+        if let Some(enum_) = scope.enums.get_mut(name) {
+            enum_.is_used = true;
+            if let Some(variant) = enum_.variants.iter_mut().find(|variant| &variant.name == field) {
+                variant.is_used = true;
+            }
         }
     }
     for struct_name in &references.structs {
